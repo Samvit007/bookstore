@@ -79,23 +79,15 @@ bookstore/
 
 ### Homepage
 ![Homepage](src/main/resources/static/screenshots/home.png)
-*Browse and search for your favorite books.*
 
 ### Book Details
 ![Book Details](src/main/resources/static/screenshots/details.png)
-*Read descriptions and check user ratings.*
 
 ### Shopping Cart
 ![Cart](src/main/resources/static/screenshots/cart.png)
-*Manage your selected items before checkout.*
 
 ### Checkout
 ![Checkout](src/main/resources/static/screenshots/checkout.png)
-*Complete your purchase with ease.*
-
-### Authentication
-![Auth](src/main/resources/static/screenshots/auth.png)
-*Secure login and signup forms.*
 
 ## 🛣️ API Endpoints
 
