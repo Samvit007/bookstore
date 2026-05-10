@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Details — PageTurn</title>
+  <meta name="description" content="View book details, description, and reviews. Add to cart and share your own review."/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>"/>
+  <style>
+    .book-detail-hero {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 3rem;
+    }
+    .book-cover-wrap {
+      position: relative;
+    }
+    .book-cover {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 60px rgba(124,58,237,0.3);
+      border: 1px solid var(--border);
+      aspect-ratio: 2/3;
+      object-fit: cover;
+    }
+    .book-genre-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.85rem;
+      background: rgba(124,58,237,0.2);
+      border: 1px solid rgba(124,58,237,0.4);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #a855f7;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .book-detail-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+    }
+    .book-detail-author {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+    .book-detail-author span {
+      color: #a855f7;
+      font-weight: 600;
+    }
+    .book-rating-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .book-rating-row .stars { font-size: 1.1rem; }
+    .rating-number { font-size: 1.5rem; font-weight: 800; color: #f59e0b; }
+    .review-count-text { font-size: 0.85rem; color: var(--text-muted); }
+    .book-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+    .book-meta-item {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      text-align: center;
+    }
+    .meta-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .meta-value { font-size: 0.9rem; font-weight: 700; margin-top: 0.2rem; }
+    .book-description {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    .book-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-add-cart-lg {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2rem;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 700;
+      transition: var(--transition);
+      box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+    }
+    .btn-add-cart-lg:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(124,58,237,0.5); }
+    /* Reviews Section */
+    .reviews-section {
+      max-width: 1100px;
+      margin: 0 auto 3rem;
+      padding: 0 2rem;
+    }
+    .reviews-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .reviews-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .review-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: var(--transition);
+    }
+    .review-card:hover { border-color: var(--border-hover); }
+    .review-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+    .reviewer-info { display: flex; align-items: center; gap: 0.75rem; }
+    .reviewer-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: #fff;
+    }
+    .reviewer-name { font-weight: 600; font-size: 0.9rem; }
+    .reviewer-date { font-size: 0.75rem; color: var(--text-muted); }
+    .review-rating { font-size: 0.85rem; color: #f59e0b; }
+    .review-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+    /* Add Review Form */
+    .add-review-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-top: 1.5rem;
+    }
+    .add-review-title { font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem; }
+    .star-picker {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .star-picker .star-btn {
+      font-size: 1.6rem;
+      background: none;
+      color: var(--text-muted);
+      transition: var(--transition);
+      cursor: pointer;
+      line-height: 1;
+    }
+    .star-picker .star-btn.active, .star-picker .star-btn:hover { color: #f59e0b; }
+    @media (max-width: 768px) {
+      .book-detail-hero { grid-template-columns: 1fr; gap: 1.5rem; }
+      .book-cover-wrap { max-width: 240px; margin: 0 auto; }
+      .book-meta-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand"><span class="brand-icon">📚</span> PageTurn</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="cart.html">Cart</a></li>
+      <li><a href="auth.html">Account</a></li>
+    </ul>
+    <div id="nav-right" class="nav-right"></div>
+  </nav>
+
+  <!-- BREADCRUMB -->
+  <div style="max-width:1100px;margin:1rem auto;padding:0 2rem;">
+    <span style="font-size:0.85rem;color:var(--text-muted);">
+      <a href="index.html" style="color:var(--text-muted);">Home</a> › <span id="breadcrumb-title" style="color:var(--text-secondary);">Loading…</span>
+    </span>
+  </div>
+
+  <!-- BOOK DETAIL LOADING -->
+  <div id="book-detail-container">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="reviews-section" id="reviews-section" style="display:none">
+    <div class="reviews-header">
+      <h2 class="reviews-title">⭐ Reader Reviews <span id="review-count-badge" style="font-size:0.9rem;color:var(--text-muted);font-weight:400;"></span></h2>
+      <button class="btn btn-secondary" onclick="toggleReviewForm()" id="write-review-btn">✍️ Write a Review</button>
+    </div>
+    <div id="reviews-list"></div>
+
+    <!-- Add Review Form -->
+    <div class="add-review-card" id="review-form-card" style="display:none">
+      <div class="add-review-title">Share Your Thoughts</div>
+      <div class="form-group">
+        <label class="form-label">Your Rating</label>
+        <div class="star-picker" id="star-picker">
+          <button class="star-btn" data-v="1" onclick="setRating(1)">★</button>
+          <button class="star-btn" data-v="2" onclick="setRating(2)">★</button>
+          <button class="star-btn" data-v="3" onclick="setRating(3)">★</button>
+          <button class="star-btn" data-v="4" onclick="setRating(4)">★</button>
+          <button class="star-btn" data-v="5" onclick="setRating(5)">★</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="review-username">Your Name</label>
+        <input type="text" id="review-username" class="form-input" placeholder="Enter your name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="review-comment">Your Review</label>
+        <textarea id="review-comment" class="form-input form-textarea" placeholder="What did you think about this book?"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="submitReview()" id="submit-review-btn">Submit Review</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><h3>📚 PageTurn</h3><p>Your premier online bookstore. Discover stories that inspire, educate, and transform your world view.</p></div>
+      <div class="footer-col"><h4>Browse</h4><ul><li><a href="index.html">All Books</a></li><li><a href="index.html?genre=Fantasy">Fantasy</a></li><li><a href="index.html?genre=Classic+Fiction">Classics</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="auth.html">Login</a></li><li><a href="cart.html">My Cart</a></li></ul></div>
+      <div class="footer-col"><h4>Help</h4><ul><li><a href="#">Contact Us</a></li><li><a href="#">Returns</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 PageTurn.</span><span>Built with ❤️</span></div>
+  </footer>
+</div>
+
+<div id="toast-container"></div>
+<script src="app.js"></script>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const bookId = urlParams.get('id');
+let currentBook = null;
+let selectedRating = 0;
+
+if (!bookId) { window.location = 'index.html'; }
+
+async function loadBook() {
+  try {
+    const res = await fetch(`/api/books/${bookId}`, { credentials: 'include' });
+    if (!res.ok) throw new Error('Not found');
+    currentBook = await res.json();
+    renderBook(currentBook);
+    renderReviews(currentBook.reviews || []);
+  } catch (e) {
+    document.getElementById('book-detail-container').innerHTML =
+      `<div class="empty-state"><div class="empty-icon">😔</div><div class="empty-title">Book not found</div><a href="index.html" class="btn btn-primary" style="margin-top:1rem">← Back to Store</a></div>`;
+  }
+}
+
+function renderBook(book) {
+  document.title = `${book.title} — PageTurn`;
+  document.getElementById('breadcrumb-title').textContent = book.title;
+  const imgFallback = `https://via.placeholder.com/400x600/1a1a2e/a855f7?text=${encodeURIComponent(book.title)}`;
+  document.getElementById('book-detail-container').innerHTML = `
+    <div class="book-detail-hero">
+      <div class="book-cover-wrap">
+        <img src="${book.imageUrl || imgFallback}" alt="${book.title}" class="book-cover"
+             onerror="this.src='${imgFallback}'"/>
+      </div>
+      <div class="book-detail-info">
+        <div class="book-genre-pill">📖 ${book.genre}</div>
+        <h1 class="book-detail-title">${book.title}</h1>
+        <div class="book-detail-author">by <span>${book.author}</span></div>
+        <div class="book-rating-row">
+          ${renderStars(book.rating)}
+          <span class="rating-number">${book.rating.toFixed(1)}</span>
+          <span class="review-count-text">${book.reviews?.length || 0} reviews</span>
+        </div>
+        <div class="book-meta-grid">
+          <div class="book-meta-item"><div class="meta-label">Price</div><div class="meta-value" style="color:#a855f7">${formatPrice(book.price)}</div></div>
+          <div class="book-meta-item"><div class="meta-label">Pages</div><div class="meta-value">${book.pages}</div></div>
+          <div class="book-meta-item"><div class="meta-label">Language</div><div class="meta-value">${book.language}</div></div>
+          <div class="book-meta-item"><div class="meta-label">ISBN</div><div class="meta-value" style="font-size:0.75rem">${book.isbn}</div></div>
+          <div class="book-meta-item"><div class="meta-label">Genre</div><div class="meta-value">${book.genre}</div></div>
+          <div class="book-meta-item"><div class="meta-label">Rating</div><div class="meta-value" style="color:#f59e0b">⭐ ${book.rating.toFixed(1)}</div></div>
+        </div>
+        <p class="book-description">${book.description}</p>
+        <div class="book-actions">
+          <button class="btn-add-cart-lg" onclick="addToCart(${book.id}, '${book.title.replace(/'/g,"\\'")}')">
+            🛒 Add to Cart — ${formatPrice(book.price)}
+          </button>
+          <a href="cart.html" class="btn btn-secondary btn-lg">View Cart →</a>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('reviews-section').style.display = 'block';
+}
+
+function renderReviews(reviews) {
+  const list = document.getElementById('reviews-list');
+  document.getElementById('review-count-badge').textContent = `(${reviews.length})`;
+  if (!reviews.length) {
+    list.innerHTML = `<div class="empty-state" style="padding:2rem"><div class="empty-icon">💬</div><div class="empty-title">No reviews yet</div><div class="empty-desc">Be the first to review this book!</div></div>`;
+    return;
+  }
+  list.innerHTML = reviews.map(r => {
+    const initial = (r.username || 'A')[0].toUpperCase();
+    const date = r.date || 'Recently';
+    return `<div class="review-card">
+      <div class="review-top">
+        <div class="reviewer-info">
+          <div class="reviewer-avatar">${initial}</div>
+          <div><div class="reviewer-name">${r.username}</div><div class="reviewer-date">${date}</div></div>
+        </div>
+        <div class="review-rating">${renderStars(r.rating)} ${r.rating}/5</div>
+      </div>
+      <p class="review-text">${r.comment}</p>
+    </div>`;
+  }).join('');
+}
+
+function toggleReviewForm() {
+  const card = document.getElementById('review-form-card');
+  const btn = document.getElementById('write-review-btn');
+  const visible = card.style.display !== 'none';
+  card.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '✍️ Write a Review' : '✕ Cancel';
+}
+
+function setRating(val) {
+  selectedRating = val;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i < val);
+  });
+}
+
+async function submitReview() {
+  const username = document.getElementById('review-username').value.trim();
+  const comment = document.getElementById('review-comment').value.trim();
+  if (!selectedRating) { showToast('Please select a star rating', 'error'); return; }
+  if (!username) { showToast('Please enter your name', 'error'); return; }
+  if (!comment) { showToast('Please write your review', 'error'); return; }
+
+  const btn = document.getElementById('submit-review-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    const res = await fetch(`/api/books/${bookId}/reviews`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, comment, rating: selectedRating })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast('Review submitted! Thank you 🎉', 'success');
+      document.getElementById('review-username').value = '';
+      document.getElementById('review-comment').value = '';
+      selectedRating = 0;
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+      toggleReviewForm();
+      // Reload book to get updated reviews
+      const bRes = await fetch(`/api/books/${bookId}`, { credentials: 'include' });
+      const b = await bRes.json();
+      currentBook = b;
+      renderReviews(b.reviews || []);
+    } else {
+      showToast(data.error || 'Could not submit review', 'error');
+    }
+  } catch (e) {
+    showToast('Network error', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit Review';
+  }
+}
+
+loadBook();
+</script>
+</body>
+</html>

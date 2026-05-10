@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PageTurn — Online Bookstore</title>
+  <meta name="description" content="Discover thousands of books. Browse by genre, search by title or author, and build your reading list today."/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>"/>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <span class="brand-icon">📚</span> PageTurn
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="cart.html">Cart</a></li>
+      <li><a href="auth.html">Account</a></li>
+    </ul>
+    <div id="nav-right" class="nav-right"></div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">✨ Your Next Great Read Awaits</div>
+    <h1>Welcome to <span class="gradient-text">PageTurn</span><br/>Your Literary Universe</h1>
+    <p>Explore our hand-curated collection of bestsellers, classics, and hidden gems. Find your next favorite book today.</p>
+
+    <!-- Search -->
+    <div class="search-section">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" class="search-input" placeholder="Search by title, author or genre…" autocomplete="off"/>
+        <button class="search-btn" id="search-btn" onclick="performSearch()">Search</button>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-number">12+</div><div class="stat-label">Books Available</div></div>
+      <div class="stat-item"><div class="stat-number">6</div><div class="stat-label">Genres</div></div>
+      <div class="stat-item"><div class="stat-number">4.7★</div><div class="stat-label">Avg Rating</div></div>
+    </div>
+  </section>
+
+  <!-- GENRE FILTER -->
+  <div class="genre-filter" id="genre-filter">
+    <span class="genre-label">Genre:</span>
+    <button class="genre-chip active" data-genre="" onclick="filterGenre(this, '')">All</button>
+  </div>
+
+  <!-- BOOKS SECTION -->
+  <main class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span>Explore</span> Our Collection</h2>
+      <span class="results-count" id="results-count"></span>
+    </div>
+    <div id="books-container">
+      <!-- Skeleton Loaders -->
+      <div class="loading-grid" id="skeleton-grid">
+        ${[...Array(8)].map(() => `
+          <div class="skeleton-card">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-line tiny"></div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>📚 PageTurn</h3>
+        <p>Your premier online bookstore. Discover stories that inspire, educate, and transform your world view.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Browse</h4>
+        <ul>
+          <li><a href="index.html">All Books</a></li>
+          <li><a href="index.html?genre=Fantasy">Fantasy</a></li>
+          <li><a href="index.html?genre=Classic+Fiction">Classics</a></li>
+          <li><a href="index.html?genre=Non-Fiction">Non-Fiction</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="auth.html">Login</a></li>
+          <li><a href="auth.html?tab=register">Register</a></li>
+          <li><a href="cart.html">My Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="#">Shipping Info</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 PageTurn. All rights reserved.</span>
+      <span>Built with ❤️ for book lovers</span>
+    </div>
+  </footer>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
+<script>
+let allBooks = [];
+let activeGenre = '';
+
+// Skeleton HTML helper
+function skeletonHTML(n) {
+  return `<div class="loading-grid">${Array.from({length:n}, () => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-body">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line tiny"></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function loadBooks(url) {
+  const container = document.getElementById('books-container');
+  container.innerHTML = skeletonHTML(8);
+  try {
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error('Failed');
+    const books = await res.json();
+    allBooks = books;
+    renderBooks(books);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">😔</div><div class="empty-title">Could not load books</div><div class="empty-desc">Please check if the server is running.</div></div>`;
+  }
+}
+
+function renderBooks(books) {
+  const container = document.getElementById('books-container');
+  const count = document.getElementById('results-count');
+  count.textContent = `${books.length} book${books.length !== 1 ? 's' : ''} found`;
+  if (!books.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No books found</div><div class="empty-desc">Try a different search term or genre.</div></div>`;
+    return;
+  }
+  container.innerHTML = `<div class="books-grid">${books.map(book => bookCardHTML(book)).join('')}</div>`;
+}
+
+function bookCardHTML(book) {
+  const imgFallback = `https://via.placeholder.com/400x260/1a1a2e/a855f7?text=${encodeURIComponent(book.title)}`;
+  return `
+    <div class="book-card" onclick="window.location='book.html?id=${book.id}'" id="book-${book.id}">
+      <div class="book-card-img-wrap">
+        <img src="${book.imageUrl || imgFallback}" alt="${book.title}" class="book-card-image"
+             onerror="this.src='${imgFallback}'"/>
+        <span class="book-card-genre-tag">${book.genre}</span>
+      </div>
+      <div class="book-card-body">
+        <div class="book-card-title">${book.title}</div>
+        <div class="book-card-author">by ${book.author}</div>
+        <div class="book-card-rating">
+          ${renderStars(book.rating)}
+          <span class="rating-val">${book.rating.toFixed(1)} (${book.reviewCount || book.reviews?.length || 0})</span>
+        </div>
+        <div class="book-card-footer">
+          <span class="book-card-price">${formatPrice(book.price)}</span>
+          <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart(${book.id}, '${book.title.replace(/'/g,"\\'")}')">
+            🛒 Add
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function loadGenres() {
+  try {
+    const res = await fetch('/api/books/genres', { credentials: 'include' });
+    const genres = await res.json();
+    const filter = document.getElementById('genre-filter');
+    genres.forEach(g => {
+      const btn = document.createElement('button');
+      btn.className = 'genre-chip';
+      btn.dataset.genre = g;
+      btn.textContent = g;
+      btn.onclick = () => filterGenre(btn, g);
+      filter.appendChild(btn);
+    });
+  } catch (_) {}
+}
+
+function filterGenre(btn, genre) {
+  document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  activeGenre = genre;
+  const url = genre ? `/api/books?genre=${encodeURIComponent(genre)}` : '/api/books';
+  loadBooks(url);
+}
+
+function performSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) { loadBooks('/api/books'); return; }
+  loadBooks(`/api/books?search=${encodeURIComponent(q)}`);
+  document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.genre-chip[data-genre=""]').classList.add('active');
+}
+
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') performSearch();
+});
+
+// Check URL params
+const urlParams = new URLSearchParams(window.location.search);
+const genreParam = urlParams.get('genre');
+const searchParam = urlParams.get('search');
+
+loadGenres();
+if (genreParam) {
+  loadBooks(`/api/books?genre=${encodeURIComponent(genreParam)}`);
+} else if (searchParam) {
+  document.getElementById('search-input').value = searchParam;
+  loadBooks(`/api/books?search=${encodeURIComponent(searchParam)}`);
+} else {
+  loadBooks('/api/books');
+}
+</script>
+</body>
+</html>

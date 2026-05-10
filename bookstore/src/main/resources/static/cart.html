@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Cart — PageTurn</title>
+  <meta name="description" content="Review your cart, update quantities, and proceed to checkout."/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>"/>
+  <style>
+    .cart-layout {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 2rem;
+    }
+    .cart-page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.75rem;
+    }
+    .cart-item-card {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 1.25rem;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem;
+      margin-bottom: 1rem;
+      transition: var(--transition);
+    }
+    .cart-item-card:hover { border-color: var(--border-hover); }
+    .cart-item-img {
+      width: 80px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .cart-item-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      cursor: pointer;
+    }
+    .cart-item-title:hover { color: #a855f7; }
+    .cart-item-author { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.6rem; }
+    .cart-item-price { font-size: 0.9rem; color: #a855f7; font-weight: 700; }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+    .qty-btn {
+      width: 28px; height: 28px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .qty-btn:hover { background: var(--bg-glass-hover); border-color: var(--border-hover); }
+    .qty-value { font-size: 0.9rem; font-weight: 600; min-width: 24px; text-align: center; }
+    .cart-item-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.6rem;
+    }
+    .cart-item-subtotal { font-size: 1rem; font-weight: 800; color: #a855f7; }
+    .remove-btn {
+      padding: 0.4rem 0.8rem;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius-sm);
+      color: #ef4444;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .remove-btn:hover { background: rgba(239,68,68,0.2); }
+    /* Summary Card */
+    .order-summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      position: sticky;
+      top: 90px;
+      height: fit-content;
+    }
+    .summary-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+    .summary-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+    .summary-total .total-amount { color: #a855f7; font-size: 1.3rem; }
+    .checkout-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 6px 20px rgba(124,58,237,0.3);
+    }
+    .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(124,58,237,0.5); }
+    .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .continue-shopping {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+    .continue-shopping:hover { color: #a855f7; }
+    .summary-perks {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .perk-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 768px) {
+      .cart-layout { grid-template-columns: 1fr; }
+      .order-summary { position: static; }
+      .cart-item-card { grid-template-columns: 70px 1fr; }
+      .cart-item-actions { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand"><span class="brand-icon">📚</span> PageTurn</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="cart.html" class="active">Cart</a></li>
+      <li><a href="auth.html">Account</a></li>
+    </ul>
+    <div id="nav-right" class="nav-right"></div>
+  </nav>
+
+  <div class="cart-layout" id="cart-wrapper">
+    <div>
+      <h1 class="cart-page-title">🛒 Your Cart</h1>
+      <div id="cart-items-container">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <div>
+      <div class="order-summary">
+        <div class="summary-title">Order Summary</div>
+        <div class="summary-row"><span id="items-count-label">Items</span><span id="summary-subtotal">$0.00</span></div>
+        <div class="summary-row"><span>Shipping</span><span style="color:#10b981">Free</span></div>
+        <div class="summary-row"><span>Tax (8%)</span><span id="summary-tax">$0.00</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-total">
+          <span>Total</span>
+          <span class="total-amount" id="summary-total">$0.00</span>
+        </div>
+        <button class="checkout-btn" id="checkout-btn" onclick="goCheckout()" disabled>
+          Proceed to Checkout →
+        </button>
+        <a href="index.html" class="continue-shopping">← Continue Shopping</a>
+        <div class="summary-perks">
+          <div class="perk-item">✅ Free shipping on all orders</div>
+          <div class="perk-item">🔒 Secure checkout</div>
+          <div class="perk-item">↩️ Easy 30-day returns</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><h3>📚 PageTurn</h3><p>Your premier online bookstore.</p></div>
+      <div class="footer-col"><h4>Browse</h4><ul><li><a href="index.html">All Books</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="auth.html">Login</a></li></ul></div>
+      <div class="footer-col"><h4>Help</h4><ul><li><a href="#">Contact</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 PageTurn.</span><span>Built with ❤️</span></div>
+  </footer>
+</div>
+
+<div id="toast-container"></div>
+<script src="app.js"></script>
+<script>
+let cartData = { items: [], total: 0, count: 0 };
+
+async function loadCart() {
+  const container = document.getElementById('cart-items-container');
+  try {
+    const res = await fetch('/api/cart', { credentials: 'include' });
+    if (!res.ok) throw new Error();
+    cartData = await res.json();
+    renderCart(cartData);
+  } catch (e) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-title">Failed to load cart</div></div>`;
+  }
+}
+
+function renderCart(data) {
+  const container = document.getElementById('cart-items-container');
+  if (!data.items || data.items.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🛒</div>
+        <div class="empty-title">Your cart is empty</div>
+        <div class="empty-desc">Explore our collection and add some books!</div>
+        <a href="index.html" class="btn btn-primary" style="margin-top:1.5rem">Browse Books</a>
+      </div>`;
+    updateSummary(0, 0);
+    document.getElementById('checkout-btn').disabled = true;
+    return;
+  }
+  const imgFallback = (t) => `https://via.placeholder.com/80x110/1a1a2e/a855f7?text=${encodeURIComponent(t)}`;
+  container.innerHTML = data.items.map(item => `
+    <div class="cart-item-card" id="cart-item-${item.id}">
+      <img src="${item.imageUrl || imgFallback(item.title)}" alt="${item.title}" class="cart-item-img"
+           onerror="this.src='${imgFallback(item.title)}'"/>
+      <div>
+        <div class="cart-item-title" onclick="window.location='book.html?id=${item.bookId}'">${item.title}</div>
+        <div class="cart-item-author">by ${item.author}</div>
+        <div class="cart-item-price">${formatPrice(item.price)} each</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="updateQty(${item.id}, ${item.quantity - 1})">−</button>
+          <span class="qty-value">${item.quantity}</span>
+          <button class="qty-btn" onclick="updateQty(${item.id}, ${item.quantity + 1})">+</button>
+        </div>
+      </div>
+      <div class="cart-item-actions">
+        <span class="cart-item-subtotal">${formatPrice(item.price * item.quantity)}</span>
+        <button class="remove-btn" onclick="removeItem(${item.id})">🗑 Remove</button>
+      </div>
+    </div>`).join('');
+
+  updateSummary(data.total, data.count);
+  document.getElementById('checkout-btn').disabled = false;
+}
+
+function updateSummary(subtotal, count) {
+  const tax = subtotal * 0.08;
+  const total = subtotal + tax;
+  document.getElementById('items-count-label').textContent = `Items (${count})`;
+  document.getElementById('summary-subtotal').textContent = formatPrice(subtotal);
+  document.getElementById('summary-tax').textContent = formatPrice(tax);
+  document.getElementById('summary-total').textContent = formatPrice(total);
+}
+
+async function removeItem(itemId) {
+  try {
+    const res = await fetch(`/api/cart/${itemId}`, { method: 'DELETE', credentials: 'include' });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    showToast('Item removed from cart', 'info');
+    loadCart();
+  } catch (e) {
+    showToast('Could not remove item', 'error');
+  }
+}
+
+async function updateQty(itemId, newQty) {
+  if (newQty < 0) return;
+  try {
+    if (newQty === 0) {
+      await removeItem(itemId);
+      return;
+    }
+    const res = await fetch(`/api/cart/${itemId}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity: newQty })
+    });
+    if (!res.ok) throw new Error();
+    loadCart();
+  } catch (e) {
+    showToast('Could not update quantity', 'error');
+  }
+}
+
+function goCheckout() {
+  if (!cartData.items || cartData.items.length === 0) {
+    showToast('Your cart is empty!', 'error');
+    return;
+  }
+  window.location.href = 'checkout.html';
+}
+
+loadCart();
+</script>
+</body>
+</html>

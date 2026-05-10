@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Register — PageTurn</title>
+  <meta name="description" content="Sign in or create an account to track orders and save your preferences."/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>"/>
+  <style>
+    .auth-page {
+      min-height: calc(100vh - 68px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 440px;
+    }
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .auth-logo .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .auth-logo p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2.25rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .auth-tabs {
+      display: flex;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 2rem;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .auth-tab.active {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+    }
+    .auth-form-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .auth-form-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+    .auth-submit-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(124,58,237,0.3);
+      margin-top: 0.5rem;
+    }
+    .auth-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124,58,237,0.5); }
+    .auth-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .password-wrap { position: relative; }
+    .password-toggle {
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    .password-toggle:hover { color: var(--text-primary); }
+    .auth-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: #f87171;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    /* Profile Section */
+    .profile-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2.25rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .profile-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #ec4899);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700; color: #fff;
+      margin: 0 auto 1rem;
+      box-shadow: 0 0 30px rgba(124,58,237,0.4);
+    }
+    .profile-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .profile-username { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 1.5rem;
+      background: var(--bg-glass);
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+    }
+    .profile-stat { text-align: center; }
+    .profile-stat-num { font-size: 1.3rem; font-weight: 800; color: #a855f7; }
+    .profile-stat-label { font-size: 0.75rem; color: var(--text-muted); }
+    .logout-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: var(--radius-md);
+      color: #ef4444;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 1rem;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.2); }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand"><span class="brand-icon">📚</span> PageTurn</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="cart.html">Cart</a></li>
+      <li><a href="auth.html" class="active">Account</a></li>
+    </ul>
+    <div id="nav-right" class="nav-right"></div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-container">
+
+      <div class="auth-logo">
+        <div class="logo-text">📚 PageTurn</div>
+        <p>Your literary journey starts here</p>
+      </div>
+
+      <!-- AUTH FORMS -->
+      <div id="auth-card-section">
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+            <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Create Account</div>
+          </div>
+
+          <!-- LOGIN FORM -->
+          <div id="login-form">
+            <div class="auth-form-title">Welcome back!</div>
+            <div class="auth-form-subtitle">Sign in to your PageTurn account</div>
+            <div class="auth-error" id="login-error"></div>
+            <div class="form-group">
+              <label class="form-label" for="login-username">Username</label>
+              <input type="text" id="login-username" class="form-input" placeholder="your_username" autocomplete="username"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-password">Password</label>
+              <div class="password-wrap">
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••" style="padding-right:2.5rem" autocomplete="current-password"/>
+                <button class="password-toggle" onclick="togglePwd('login-password', this)" type="button">👁</button>
+              </div>
+            </div>
+            <button class="auth-submit-btn" id="login-btn" onclick="doLogin()">Sign In →</button>
+          </div>
+
+          <!-- REGISTER FORM -->
+          <div id="register-form" style="display:none">
+            <div class="auth-form-title">Join PageTurn</div>
+            <div class="auth-form-subtitle">Create your free account today</div>
+            <div class="auth-error" id="register-error"></div>
+            <div class="form-group">
+              <label class="form-label" for="reg-fullname">Full Name</label>
+              <input type="text" id="reg-fullname" class="form-input" placeholder="John Doe"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-username">Username</label>
+              <input type="text" id="reg-username" class="form-input" placeholder="choose_username" autocomplete="username"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-email">Email</label>
+              <input type="email" id="reg-email" class="form-input" placeholder="john@example.com"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-password">Password</label>
+              <div class="password-wrap">
+                <input type="password" id="reg-password" class="form-input" placeholder="Min. 6 characters" style="padding-right:2.5rem" autocomplete="new-password"/>
+                <button class="password-toggle" onclick="togglePwd('reg-password', this)" type="button">👁</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-confirm">Confirm Password</label>
+              <div class="password-wrap">
+                <input type="password" id="reg-confirm" class="form-input" placeholder="Repeat password" style="padding-right:2.5rem"/>
+                <button class="password-toggle" onclick="togglePwd('reg-confirm', this)" type="button">👁</button>
+              </div>
+            </div>
+            <button class="auth-submit-btn" id="register-btn" onclick="doRegister()">Create Account →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE (shown when logged in) -->
+      <div id="profile-section" style="display:none">
+        <div class="profile-card">
+          <div class="profile-avatar" id="profile-avatar"></div>
+          <div class="profile-name" id="profile-name"></div>
+          <div class="profile-username" id="profile-username"></div>
+          <div class="profile-stats">
+            <div class="profile-stat"><div class="profile-stat-num">🛒</div><div class="profile-stat-label">Cart Active</div></div>
+            <div class="profile-stat"><div class="profile-stat-num">📚</div><div class="profile-stat-label">Book Lover</div></div>
+            <div class="profile-stat"><div class="profile-stat-num">⭐</div><div class="profile-stat-label">Member</div></div>
+          </div>
+          <a href="index.html" class="btn btn-primary btn-full">Browse Books</a>
+          <button class="logout-btn" onclick="doLogout()">🚪 Sign Out</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><h3>📚 PageTurn</h3><p>Your premier online bookstore.</p></div>
+      <div class="footer-col"><h4>Browse</h4><ul><li><a href="index.html">All Books</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="auth.html">Login</a></li></ul></div>
+      <div class="footer-col"><h4>Help</h4><ul><li><a href="#">Contact</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 PageTurn.</span><span>Built with ❤️</span></div>
+  </footer>
+</div>
+
+<div id="toast-container"></div>
+<script src="app.js"></script>
+<script>
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('register-error').style.display = 'none';
+}
+
+function togglePwd(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+function showFormError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  document.getElementById('login-error').style.display = 'none';
+  if (!username || !password) { showFormError('login-error', 'Please enter username and password.'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(`Welcome back, ${data.fullName || data.username}! 🎉`, 'success');
+      setTimeout(() => checkAuthAndRender(), 600);
+    } else {
+      showFormError('login-error', data.error || 'Invalid credentials');
+    }
+  } catch (e) {
+    showFormError('login-error', 'Network error. Please try again.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In →';
+  }
+}
+
+async function doRegister() {
+  const fullName = document.getElementById('reg-fullname').value.trim();
+  const username = document.getElementById('reg-username').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  document.getElementById('register-error').style.display = 'none';
+
+  if (!fullName || !username || !email || !password) { showFormError('register-error', 'All fields are required.'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFormError('register-error', 'Please enter a valid email.'); return; }
+  if (password.length < 6) { showFormError('register-error', 'Password must be at least 6 characters.'); return; }
+  if (password !== confirm) { showFormError('register-error', 'Passwords do not match.'); return; }
+
+  const btn = document.getElementById('register-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password, fullName })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(`Account created! Welcome, ${data.fullName}! 🎉`, 'success');
+      setTimeout(() => checkAuthAndRender(), 600);
+    } else {
+      showFormError('register-error', data.error || 'Registration failed');
+    }
+  } catch (e) {
+    showFormError('register-error', 'Network error. Please try again.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account →';
+  }
+}
+
+async function doLogout() {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    showToast('Logged out successfully', 'info');
+    setTimeout(() => checkAuthAndRender(), 800);
+  } catch (_) {}
+}
+
+async function checkAuthAndRender() {
+  try {
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    const data = await res.json();
+    if (data.loggedIn) {
+      document.getElementById('auth-card-section').style.display = 'none';
+      document.getElementById('profile-section').style.display = 'block';
+      const initial = (data.fullName || data.username || 'U')[0].toUpperCase();
+      document.getElementById('profile-avatar').textContent = initial;
+      document.getElementById('profile-name').textContent = data.fullName || data.username;
+      document.getElementById('profile-username').textContent = `@${data.username}`;
+      initNavbar();
+    } else {
+      document.getElementById('auth-card-section').style.display = 'block';
+      document.getElementById('profile-section').style.display = 'none';
+    }
+  } catch (_) {
+    document.getElementById('auth-card-section').style.display = 'block';
+    document.getElementById('profile-section').style.display = 'none';
+  }
+}
+
+// Check URL param for tab
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('tab') === 'register') switchTab('register');
+
+// Enter key support
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const loginVisible = document.getElementById('login-form').style.display !== 'none';
+  if (loginVisible) doLogin(); else doRegister();
+});
+
+checkAuthAndRender();
+</script>
+</body>
+</html>
