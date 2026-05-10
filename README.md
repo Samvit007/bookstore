@@ -73,22 +73,19 @@ bookstore/
 └── pom.xml
 ```
 
-## 📸 Screenshots
+## Screenshots
 
-*(Add your screenshots here)*
 ### Homepage
-![Homepage](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/home.png)
+![Homepage](src/main/resources/static/screenshots/home.png)
 
 ### Book Details
-![Book Details](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/details.png)
+![Book Details](src/main/resources/static/screenshots/details.png)
 
-### Shopping Cart
-![Cart](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/cart.png)
+### Cart
+![Cart](src/main/resources/static/screenshots/cart.png)
 
 ### Checkout
-![Checkout](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/checkout.png)
-
-
+![Checkout](src/main/resources/static/screenshots/checkout.png)
 
 ## 🛣️ API Endpoints
 
