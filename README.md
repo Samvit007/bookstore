@@ -76,18 +76,19 @@ bookstore/
 ## 📸 Screenshots
 
 *(Add your screenshots here)*
-
 ### Homepage
-![Homepage](src/main/resources/static/screenshots/home.png)
+![Homepage](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/home.png)
 
 ### Book Details
-![Book Details](src/main/resources/static/screenshots/details.png)
+![Book Details](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/details.png)
 
 ### Shopping Cart
-![Cart](src/main/resources/static/screenshots/cart.png)
+![Cart](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/cart.png)
 
 ### Checkout
-![Checkout](src/main/resources/static/screenshots/checkout.png)
+![Checkout](https://raw.githubusercontent.com/Samvit007/bookstore/main/src/main/resources/static/screenshots/checkout.png)
+
+
 
 ## 🛣️ API Endpoints
 
